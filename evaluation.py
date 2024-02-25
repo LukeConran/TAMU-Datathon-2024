@@ -9,24 +9,24 @@ if len(sys.argv) == 3:
     loaded_model = tf.keras.models.load_model(sys.argv[1])
     image_name = sys.argv[2]
 
-    model = tf.keras.models.load_model(sys.argv[1])
+    # load image via tf.io
+    img = tf.io.read_file(image_name)
 
-    image = tf.keras.preprocessing.image.load_img(image_name, target_size=(227, 227))
-    image = tf.keras.preprocessing.image.img_to_array(image)
-    image = image / 227
+    # convert to tensor (specify 3 channels explicitly since png files contains additional alpha channel)
+    # set the dtypes to align with pytorch for comparison since it will use uint8 by default
+    tensor = tf.io.decode_image(img, channels=3, dtype=tf.dtypes.float32)
+    # (384, 470, 3)
 
-    image = tf.expand_dims(image, axis=0)
+    # resize tensor to 224 x 224
+    tensor = tf.image.resize(tensor, [227, 227])
+    # (224, 224, 3)
 
-    # Prepare the label (assuming binary classification, adjust as needed)
-    # 1 if the image fits the criteria, 0 otherwise
-    label = 1  # or 0 depending on your criteria
-
-    # Evaluate the model
-    loss, accuracy = loaded_model.evaluate(image, [label])
-
+    # add another dimension at the front to get NHWC shape
+    input_tensor = tf.expand_dims(tensor, axis=0)
     # Interpret the evaluation metrics
+    accuracy = loaded_model.evaluate(input_tensor)
     print(accuracy)
-    if accuracy >= 0.5:  # adjust the threshold as needed
-        print("Image fits the criteria")
-    else:
-        print("Image does not fit the criteria")
+    # if accuracy >= 0.5:  # adjust the threshold as needed
+    #     print("Image fits the criteria")
+    # else:
+    #     print("Image does not fit the criteria")
