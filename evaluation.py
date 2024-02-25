@@ -15,11 +15,11 @@ if len(sys.argv) == 3:
     # convert to tensor (specify 3 channels explicitly since png files contains additional alpha channel)
     # set the dtypes to align with pytorch for comparison since it will use uint8 by default
     tensor = tf.io.decode_image(img, channels=3, dtype=tf.dtypes.float32)
-    # (384, 470, 3)
+    # (x, y, 3)
 
-    # resize tensor to 224 x 224
+    # resize tensor to 227 x 227
     tensor = tf.image.resize(tensor, [227, 227])
-    # (224, 224, 3)
+    # (227, 227, 3)
 
     # add another dimension at the front to get NHWC shape
     input_tensor = tf.expand_dims(tensor, axis=0)
